@@ -1,11 +1,11 @@
 {
   "name": "pistachio2",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Amazingly fast and flexible JS Templating",
   "main": "./index.js",
   "author": {
     "name": "Philipp Dunkel",
-    "email": "phidelta@phideltacity.net"
+    "email": "npm@durchblicker.at"
   },
   "bin": {
     "pistachio": "./compile.js"
