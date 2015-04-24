@@ -1,0 +1,11 @@
+{
+  "site": "http://durchblicker.at",
+  "company": "YOUSURE Tarifvergleich GmbH",
+  "person":[
+    { "name":"Reinhold", "job":"Business & Sales" },
+    { "name":"Michi", "job":"Business & Finances" },
+    { "name":"Philipp", "job":"All Development" },
+    { "name":"Markus", "job":"Frontend Development" },
+    { "name":"Stefan", "job":"Backend  Development" }
+  ]
+}

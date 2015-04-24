@@ -1,0 +1,4 @@
+{
+  "cmd": ["pistachio", "--out=$file_path/$file_base_name.pistachio", "$file"],
+  "selector":"text.html.basic"
+}
