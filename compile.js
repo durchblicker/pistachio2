@@ -1,4 +1,4 @@
-#!/usr/local/bin/node
+#!/usr/bin/env node
 
 /*
 ** © 2012 by YOUSURE Tarifvergleich GmbH. Licensed under MIT License
@@ -6,7 +6,7 @@
 
 var Path = require('path');
 var Fs = require('fs');
-var Pea = require('pea');
+var async = require('async');
 var Package = require('./package.json');
 var Program = require('commander');
 var Pistachio = require(Package.main);
@@ -22,52 +22,67 @@ Program.command('*').action(function(template){
     stripSpace:!!Program.stripSpace,
     stripTagSpace:!!Program.html
   };
-  Pea(Pistachio.compile, template, options).next(Pea(function(callback) {
-    var template = this.previousValue, json;
-    if (Program.render) {
-      var json = Pea(Fs.readFile, Program.render, 'utf-8');
-      var parse = Pea(parsejson);
-      var load = Pea(Pistachio.javascript, template, '<anonymous>');
-      var render = Pea(function(callback) {
-        try {
-          template = template(json);
-        } catch(err) {
-          return callback(err);
-        }
-        callback();
-      });
-      var write =Pea(function save(fn) {
+  async.waterfall([
+    function(callback){
+      Pistachio.compile(template, options, callback);
+    },
+    function(previousValue, callback) {
+      var template = previousValue, json;
+      if (Program.render) {
+
+
+        async.waterfall([
+          function(callback){
+            Fs.readFile( Program.render, 'utf-8', callback);
+          },
+          function(previousValue, callback){
+            try {
+              json = JSON.parse(previousValue);
+            } catch(err) {
+              return callback(err);
+            }
+            callback();
+          },
+          function(callback){
+            Pistachio.javascript( template, '<anonymous>', callback);
+          },
+          function(previousValue, callback){
+            template = previousValue;
+            callback();
+          },
+          function(callback){
+            try {
+              template = template(json);
+            } catch(err) {
+              return callback(err);
+            }
+            callback();
+          },function(callback){
+            if (Program.out) {
+              Fs.writeFile(Program.out, template, callback);
+              // Pea(Fs.writeFile, Program.out, template).then(callback);
+            } else {
+              process.stdout.write(template);
+              callback();
+            }
+          }
+        ],callback);
+
+
+      } else {
         if (Program.out) {
-          Pea(Fs.writeFile, Program.out, template).then(callback);
+          Fs.writeFile(Program.out, template, callback);
+          // Pea(Fs.writeFile, Program.out, template).then(callback);
         } else {
           process.stdout.write(template);
           callback();
         }
-      });
-      json.next(parse).next(load).next(Pea(settpl)).next(render).next(write).failure(callback);
-
-      function parsejson(callback) {
-        try {
-          json = JSON.parse(this.previousValue);
-        } catch(err) {
-          return callback(err);
-        }
-        callback();
-      }
-      function settpl(callback) {
-        template = this.previousValue;
-        callback()
-      }
-    } else {
-      if (Program.out) {
-        Pea(Fs.writeFile, Program.out, template).then(callback);
-      } else {
-        process.stdout.write(template);
-        callback();
       }
     }
-  })).error(function(err) {
-    console.error('ERROR: ', err.message);
+  ], function (err, result) {
+    if(err){
+      console.error('ERROR: ', err.message);
+    }
   });
 });
 Program.parse(process.argv);
