@@ -1,6 +1,6 @@
 {
   "name": "pistachio2",
-  "version": "1.0.3",
+  "version": "1.0.6",
   "description": "Amazingly fast and flexible JS Templating",
   "main": "./index.js",
   "author": {
